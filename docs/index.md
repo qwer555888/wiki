@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 查看笔记
-      link: /notes/2026/04-04
+      link: /notes/2026/04-04/01-建站笔记
     - theme: alt
       text: GitHub
       link: https://github.com/qwer555888/wiki

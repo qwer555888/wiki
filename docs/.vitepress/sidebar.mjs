@@ -14,21 +14,34 @@ function getYearFolders(notesPath) {
   return years.sort().reverse()
 }
 
-function getMarkdownFiles(yearPath) {
-  const files = []
-  if (!fs.existsSync(yearPath)) return files
+function getDateFolders(yearPath) {
+  const dates = []
+  if (!fs.existsSync(yearPath)) return dates
 
   const items = fs.readdirSync(yearPath, { withFileTypes: true })
+  for (const item of items) {
+    if (item.isDirectory() && /^\d{2}-\d{2}$/.test(item.name)) {
+      dates.push(item.name)
+    }
+  }
+  return dates.sort().reverse()
+}
+
+function getMarkdownFiles(datePath) {
+  const files = []
+  if (!fs.existsSync(datePath)) return files
+
+  const items = fs.readdirSync(datePath, { withFileTypes: true })
   for (const item of items) {
     if (item.isFile() && item.name.endsWith('.md')) {
       files.push(item.name)
     }
   }
-  return files.sort().reverse()
+  return files.sort()
 }
 
-function parseDate(filename) {
-  const match = filename.match(/^(\d{2})-(\d{2})\.md$/)
+function parseDate(folderName) {
+  const match = folderName.match(/^(\d{2})-(\d{2})$/)
   if (match) {
     return {
       month: match[1],
@@ -36,6 +49,13 @@ function parseDate(filename) {
     }
   }
   return null
+}
+
+function extractTitle(filename) {
+  // Remove .md extension and number prefix (e.g., "01-标题.md" -> "标题")
+  const withoutExt = filename.replace('.md', '')
+  const match = withoutExt.match(/^\d+-(.+)$/)
+  return match ? match[1] : withoutExt
 }
 
 export function generateSidebar() {
@@ -48,22 +68,37 @@ export function generateSidebar() {
 
   for (const year of years) {
     const yearPath = path.join(notesPath, year)
-    const files = getMarkdownFiles(yearPath)
+    const dateFolders = getDateFolders(yearPath)
 
-    const items = files.map(file => {
-      const date = parseDate(file)
-      const text = date ? `${date.month}-${date.day}` : file.replace('.md', '')
-      return {
-        text: text,
-        link: `/notes/${year}/${file.replace('.md', '')}`
+    const dateItems = []
+    for (const dateFolder of dateFolders) {
+      const datePath = path.join(yearPath, dateFolder)
+      const files = getMarkdownFiles(datePath)
+
+      const fileItems = files.map(file => {
+        const title = extractTitle(file)
+        return {
+          text: title,
+          link: `/notes/${year}/${dateFolder}/${file.replace('.md', '')}`
+        }
+      })
+
+      if (fileItems.length > 0) {
+        const date = parseDate(dateFolder)
+        const dateText = date ? `${date.month}-${date.day}` : dateFolder
+        dateItems.push({
+          text: dateText,
+          collapsed: false,
+          items: fileItems
+        })
       }
-    })
+    }
 
-    if (items.length > 0) {
+    if (dateItems.length > 0) {
       sidebar['/notes/'].push({
         text: `${year}年`,
         collapsed: year !== new Date().getFullYear().toString(),
-        items: items
+        items: dateItems
       })
     }
   }

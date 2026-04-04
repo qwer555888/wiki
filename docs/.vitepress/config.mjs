@@ -10,7 +10,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
-      { text: '笔记', link: '/notes/2026/04-04' }
+      { text: '笔记', link: '/notes/2026/04-05/01-笔记' }
     ],
 
     sidebar: generateSidebar(),
