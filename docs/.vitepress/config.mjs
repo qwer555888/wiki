@@ -1,7 +1,9 @@
-import { defineConfig } from 'vitepress'
+﻿import { defineConfig } from 'vitepress'
 import { generateSidebar } from './sidebar.mjs'
 
 export default defineConfig({
+  ignoreDeadLinks: true,
+  
   ignoreDeadLinks: true,
   title: "Quimaz's Wiki",
   description: 'Personal Knowledge Base',
@@ -10,8 +12,8 @@ export default defineConfig({
 
   themeConfig: {
     nav: [
-      { text: '首页', link: '/' },
-      { text: '笔记', link: '/notes/2026/04-05/01-笔记' }
+      { text: '棣栭〉', link: '/' },
+      { text: '绗旇', link: '/notes/2026/04-05/01-绗旇' }
     ],
 
     sidebar: generateSidebar(),
@@ -25,7 +27,7 @@ export default defineConfig({
     },
 
     lastUpdated: {
-      text: '最后更新',
+      text: '鏈€鍚庢洿鏂?,
       formatOptions: {
         dateStyle: 'short',
         timeStyle: 'short'
@@ -33,3 +35,4 @@ export default defineConfig({
     }
   }
 })
+
