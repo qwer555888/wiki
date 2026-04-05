@@ -112,9 +112,10 @@ export function generateSidebar() {
           }
         } else {
           // Other file types: direct link to file with target=_blank
+          // Note: Need to include /wiki base path for direct file links
           return {
             text: `${icon}${title}`,
-            link: filePath,
+            link: `/wiki${filePath}`,
             target: '_blank'
           }
         }
