@@ -36,17 +36,30 @@ const FILE_TYPE_CONFIG = {
   '.xlsx': { icon: '📊 ' }
 }
 
-const SUPPORTED_EXTENSIONS = Object.keys(FILE_TYPE_CONFIG)
+const NON_MD_EXTENSIONS = ['.pdf', '.html', '.docx', '.xlsx']
 
-function getFiles(datePath) {
+function getMarkdownFiles(datePath) {
   const files = []
   if (!fs.existsSync(datePath)) return files
 
   const items = fs.readdirSync(datePath, { withFileTypes: true })
   for (const item of items) {
+    if (item.isFile() && item.name.toLowerCase().endsWith('.md')) {
+      files.push(item.name)
+    }
+  }
+  return files.sort()
+}
+
+function getPublicFiles(publicDatePath) {
+  const files = []
+  if (!fs.existsSync(publicDatePath)) return files
+
+  const items = fs.readdirSync(publicDatePath, { withFileTypes: true })
+  for (const item of items) {
     if (item.isFile()) {
       const ext = path.extname(item.name).toLowerCase()
-      if (SUPPORTED_EXTENSIONS.includes(ext)) {
+      if (NON_MD_EXTENSIONS.includes(ext)) {
         files.push(item.name)
       }
     }
@@ -84,6 +97,7 @@ function extractTitle(filename) {
 
 export function generateSidebar() {
   const notesPath = path.resolve('docs/notes')
+  const publicNotesPath = path.resolve('docs/public/notes')
   const years = getYearFolders(notesPath)
 
   const sidebar = {
@@ -92,34 +106,44 @@ export function generateSidebar() {
 
   for (const year of years) {
     const yearPath = path.join(notesPath, year)
+    const publicYearPath = path.join(publicNotesPath, year)
     const dateFolders = getDateFolders(yearPath)
 
     const dateItems = []
     for (const dateFolder of dateFolders) {
       const datePath = path.join(yearPath, dateFolder)
-      const files = getFiles(datePath)
+      const publicDatePath = path.join(publicYearPath, dateFolder)
 
-      const fileItems = files.map(file => {
+      // Get .md files from docs/notes/
+      const mdFiles = getMarkdownFiles(datePath)
+      // Get non-md files from docs/public/notes/
+      const publicFiles = getPublicFiles(publicDatePath)
+
+      const fileItems = []
+
+      // Process .md files
+      for (const file of mdFiles) {
         const title = extractTitle(file)
         const icon = getFileIcon(file)
         const filePath = `/notes/${year}/${dateFolder}/${file}`
+        fileItems.push({
+          text: `${icon}${title}`,
+          link: filePath.replace('.md', '')
+        })
+      }
 
-        if (isMarkdownFile(file)) {
-          // Markdown files use VitePress routing (without .md extension)
-          return {
-            text: `${icon}${title}`,
-            link: filePath.replace('.md', '')
-          }
-        } else {
-          // Other file types: direct link to file with target=_blank
-          // Note: Need to include /wiki base path for direct file links
-          return {
-            text: `${icon}${title}`,
-            link: `/wiki${filePath}`,
-            target: '_blank'
-          }
-        }
-      })
+      // Process non-md files from public directory
+      for (const file of publicFiles) {
+        const title = extractTitle(file)
+        const icon = getFileIcon(file)
+        // Links to public files are served from /wiki/notes/...
+        const filePath = `/wiki/notes/${year}/${dateFolder}/${file}`
+        fileItems.push({
+          text: `${icon}${title}`,
+          link: filePath,
+          target: '_blank'
+        })
+      }
 
       if (fileItems.length > 0) {
         const date = parseDate(dateFolder)
