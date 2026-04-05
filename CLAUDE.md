@@ -45,6 +45,14 @@ The `generateSidebar()` function in `docs/.vitepress/sidebar.mjs`:
 - Auto-collapses previous years, keeps current year expanded
 - Groups into a three-level sidebar: Year → Date → Notes
 
+### Non-Markdown File Support
+
+PDF, HTML, DOCX, and XLSX files are supported alongside markdown files:
+- **Location**: Store non-md files in `docs/public/notes/YYYY/MM-DD/` (mirrors the notes structure)
+- **Icons**: Files get type-specific icons in the sidebar (📄 PDF, 🌐 HTML, 📝 DOCX, 📊 XLSX)
+- **Links**: Non-md files use absolute URLs (`https://qwer555888.github.io/wiki/notes/...`) with `target: '_blank'` to open in new tabs
+- **Storage separation**: Markdown files live in `docs/notes/`, while other file types go in `docs/public/notes/`
+
 ### VitePress Configuration
 
 Key settings in `docs/.vitepress/config.mjs`:
