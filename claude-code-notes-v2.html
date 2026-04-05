@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 完整学习笔记 v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #e0dbd0;
+  --accent: #c8842a;
+  --accent2: #2a6b9e;
+  --accent3: #3a8a5a;
+  --danger: #c0392b;
+  --warn: #d68910;
+  --text: #2c2c2c;
+  --text-dim: #7a7060;
+  --text-bright: #111111;
+  --ink: #1a1208;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+/* ── COVER ── */
+.cover {
+  background: var(--ink);
+  color: #f0e8d8;
+  padding: 72px 60px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(200,132,42,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cover-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.cover h1 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.cover h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.cover-meta {
+  font-size: 13px;
+  color: rgba(240,232,216,0.5);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── TOC ── */
+.toc {
+  background: var(--surface2);
+  border-bottom: 2px solid var(--border);
+  padding: 40px 60px;
+}
+
+.toc-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 6px 32px;
+}
+
+.toc-item {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 3px 0;
+  transition: color 0.15s;
+}
+
+.toc-item:hover { color: var(--accent); }
+
+.toc-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  flex-shrink: 0;
+  min-width: 24px;
+}
+
+/* ── LAYOUT ── */
+.body-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+}
+
+/* ── CHAPTER ── */
+.chapter {
+  margin-top: 72px;
+  padding-top: 32px;
+  border-top: 2px solid var(--border);
+}
+
+.chapter-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.ch-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(200,132,42,0.1);
+  border: 1px solid rgba(200,132,42,0.3);
+  padding: 4px 10px;
+  border-radius: 2px;
+  white-space: nowrap;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.chapter h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.chapter p, .chapter li {
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+
+/* ── SECTION HEADING ── */
+h3 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 28px 0 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}
+
+h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin: 20px 0 8px;
+}
+
+/* ── PROSE ── */
+p { margin-bottom: 14px; }
+
+/* ── CODE ── */
+.code-block {
+  background: var(--ink);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+
+.code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.code-lang {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgba(240,232,216,0.4);
+  text-transform: uppercase;
+}
+
+.copy-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(240,232,216,0.4);
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 2px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+code {
+  display: block;
+  padding: 16px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: #c8d8b0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.8;
+}
+
+code .c { color: #5a5a4a; }
+code .k { color: #e8c080; }
+code .s { color: #90c890; }
+
+/* inline code */
+.ic {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: rgba(200,132,42,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(200,132,42,0.25);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  border-left: 3px solid;
+  padding: 14px 18px;
+  border-radius: 0 6px 6px 0;
+  margin: 16px 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+.callout.tip    { border-color: var(--accent3); background: rgba(58,138,90,0.07); color: #2d6b42; }
+.callout.warn   { border-color: var(--warn); background: rgba(214,137,16,0.07); color: #8a5c00; }
+.callout.danger { border-color: var(--danger); background: rgba(192,57,43,0.07); color: #8b2020; }
+.callout.info   { border-color: var(--accent2); background: rgba(42,107,158,0.07); color: #1e4e75; }
+.callout strong { font-weight: 600; }
+
+/* ── TABLE ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+/* ── LIST ── */
+ul, ol {
+  padding-left: 20px;
+  margin: 10px 0 14px;
+}
+li { margin-bottom: 6px; font-size: 14.5px; }
+li strong { color: var(--ink); }
+
+/* ── STEP LIST ── */
+.steps { display: flex; flex-direction: column; gap: 16px; margin: 16px 0; }
+
+.step {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.step-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.step-n {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-title { font-weight: 600; font-size: 14px; color: var(--ink); }
+
+.step-body { padding: 16px 18px; }
+.step-body p { margin-bottom: 10px; font-size: 14px; color: var(--text); }
+.step-body p:last-child { margin-bottom: 0; }
+
+/* ── GRID CARDS ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.tag-mcp    { background: rgba(42,107,158,0.12); color: var(--accent2); }
+.tag-skill  { background: rgba(58,138,90,0.12); color: var(--accent3); }
+.tag-hooks  { background: rgba(214,137,16,0.12); color: var(--warn); }
+.tag-plugin { background: rgba(200,132,42,0.12); color: var(--accent); }
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+  padding: 0; border: none;
+}
+
+.card p { font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+
+/* ── RHYME BOX ── */
+.rhyme {
+  background: var(--ink);
+  color: #e8d8b8;
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin: 20px 0;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.rhyme-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.rhyme-row {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.rhyme-key {
+  color: var(--accent);
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+/* ── DIFF ── */
+.diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.diff-box {
+  border-radius: 6px;
+  padding: 16px;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.diff-box.bad  { background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); }
+.diff-box.good { background: rgba(58,138,90,0.07); border: 1px solid rgba(58,138,90,0.2); }
+
+.diff-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.diff-box.bad .diff-label  { color: var(--danger); }
+.diff-box.good .diff-label { color: var(--accent3); }
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink);
+  color: rgba(240,232,216,0.4);
+  text-align: center;
+  padding: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 700px) {
+  .cover { padding: 48px 24px 40px; }
+  .toc { padding: 32px 24px; }
+  .body-wrap { padding: 0 20px 60px; }
+  .diff { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-label">学习笔记 · 完整版 · 2026</div>
+  <h1>Claude Code<br><em>从零到一</em><br>完整学习笔记</h1>
+  <div class="cover-meta">安装 · 配置 · 三种模式 · Agent · MCP · Skills · Hooks · 隐藏命令 · 实战案例</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">目录</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#c1"><span class="toc-n">01</span>Claude Code 是什么</a>
+    <a class="toc-item" href="#c2"><span class="toc-n">02</span>安装与配置</a>
+    <a class="toc-item" href="#c3"><span class="toc-n">03</span>CCSwitch 国内配置</a>
+    <a class="toc-item" href="#c4"><span class="toc-n">04</span>启动与界面</a>
+    <a class="toc-item" href="#c5"><span class="toc-n">05</span>三种运行模式</a>
+    <a class="toc-item" href="#c6"><span class="toc-n">06</span>CLAUDE.md 核心配置</a>
+    <a class="toc-item" href="#c7"><span class="toc-n">07</span>Agent 团队</a>
+    <a class="toc-item" href="#c8"><span class="toc-n">08</span>四层能力架构</a>
+    <a class="toc-item" href="#c9"><span class="toc-n">09</span>Hooks 钩子</a>
+    <a class="toc-item" href="#c10"><span class="toc-n">10</span>四大隐藏命令</a>
+    <a class="toc-item" href="#c11"><span class="toc-n">11</span>Plugins 插件</a>
+    <a class="toc-item" href="#c12"><span class="toc-n">12</span>Handoff 文件详解</a>
+    <a class="toc-item" href="#c13"><span class="toc-n">13</span>节省 Token</a>
+    <a class="toc-item" href="#c14"><span class="toc-n">14</span>实战：AI 日报助手</a>
+    <a class="toc-item" href="#c15"><span class="toc-n">15</span>思维转变 & 入门路径</a>
+    <a class="toc-item" href="#c16"><span class="toc-n">附录</span>口诀速查表</a>
+  </div>
+</div>
+
+<div class="body-wrap">
+
+<!-- ──────────── 01 ──────────── -->
+<div class="chapter" id="c1">
+  <div class="chapter-head">
+    <span class="ch-num">01</span>
+    <h2>Claude Code 是什么</h2>
+  </div>
+
+  <div class="callout info">
+    <strong>核心认知：</strong>Claude Code 不只是写代码的工具，而是一个以命令行为载体的万能 AI Agent，能自主操作你的电脑完成任何可描述的任务。
+  </div>
+
+  <table>
+    <thead><tr><th>传统认知</th><th>实际能力</th></tr></thead>
+    <tbody>
+      <tr><td>写代码 / 编程助手</td><td>数据分析、文件管理、资讯采集、修图、剪辑、日程安排……</td></tr>
+      <tr><td>每次对话独立</td><td>通过 Skills / Hooks / Loop 实现持续自动化</td></tr>
+      <tr><td>你问它答</td><td>你指挥，它自主执行，只汇报结果</td></tr>
+    </tbody>
+  </table>
+
+  <p>核心类比：远古人钻木取火 vs 现代人用打火机。工具的代际差距不在于"能不能做"，而在于<strong>效率和心智负担</strong>。</p>
+</div>
+
+<!-- ──────────── 02 ──────────── -->
+<div class="chapter" id="c2">
+  <div class="chapter-head">
+    <span class="ch-num">02</span>
+    <h2>安装 Claude Code</h2>
+  </div>
+
+  <h3>前提：Node.js 环境</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">终端</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>node --version
+<span class="c"># 需要 v18 或更高版本，无输出则先安装 nodejs.org</span></code>
+  </div>
+
+  <h3>安装命令</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">macOS / Linux</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>npm install -g @anthropic-ai/claude-code</code>
+  </div>
+
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Windows PowerShell（以管理员运行）</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>npm install -g @anthropic-ai/claude-code</code>
+  </div>
+
+  <div class="callout warn">
+    <strong>Windows 用户：</strong>必须使用 <strong>PowerShell</strong>，不要用 CMD。Claude Code 底层是 Unix 风格命令，PowerShell 兼容性更好。若报权限错误，右键 → 以管理员身份运行。
+  </div>
+
+  <h3>验证安装</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">终端</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>claude --version
+<span class="c"># 有版本号输出 = 安装成功</span></code>
+  </div>
+</div>
+
+<!-- ──────────── 03 ──────────── -->
+<div class="chapter" id="c3">
+  <div class="chapter-head">
+    <span class="ch-num">03</span>
+    <h2>CCSwitch——国内模型配置（必做）</h2>
+  </div>
+
+  <p>国内直连 Anthropic 官方服务不稳定，CCSwitch 允许你配置多个国产模型（Kimi、MiniMax、DeepSeek、通义等）作为后端并一键切换。</p>
+
+  <h3>安装</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">macOS</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="c"># 以实际官网命令为准，通常为：</span>
+curl -fsSL https://get.ccswitch.dev/install.sh | sh</code>
+  </div>
+
+  <p><strong>Windows：</strong>访问 CCSwitch GitHub → Releases → 下载 <span class="ic">CCSwitch-vX.X.X-windows.msi</span> → 双击安装。</p>
+
+  <h3>添加模型（以 Kimi 为例）</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-head"><div class="step-n">1</div><div class="step-title">点击 CCSwitch 界面右上角「+」</div></div>
+      <div class="step-body"><p>选择对应厂商（Kimi / MiniMax / DeepSeek 等），Base URL 会自动填写，无需手动改动。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">2</div><div class="step-title">填入 API Key</div></div>
+      <div class="step-body">
+        <p>以 Kimi 为例：访问 platform.moonshot.cn → 账户管理 → API Key → 复制粘贴进来。</p>
+        <div class="callout tip">MiniMax 建议先充值 49 元套餐，性价比最高。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">3</div><div class="step-title">点击「添加」完成</div></div>
+      <div class="step-body"><p>启动 Claude Code 后，界面左上角显示对应模型名称即配置成功。</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────── 04 ──────────── -->
+<div class="chapter" id="c4">
+  <div class="chapter-head">
+    <span class="ch-num">04</span>
+    <h2>启动与界面</h2>
+  </div>
+
+  <h3>两种启动方式</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">终端</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="c"># 普通模式（每次操作需确认）</span>
+claude
+
+<span class="c"># 危险模式（全自动，无需确认）—— 推荐日常使用</span>
+claude --dangerously-skip-permissions</code>
+  </div>
+
+  <p>首次启动会询问 <strong>Trust this folder?</strong>，选择 Yes，将当前文件夹作为 workspace。</p>
+
+  <div class="callout tip">
+    <strong>提效神器：</strong>推荐使用语音输入法（「闪电说」或「豆包输入法」），基于大模型整理语音内容，识别准确率高，大幅减少打字时间，均免费。
+  </div>
+</div>
+
+<!-- ──────────── 05 ──────────── -->
+<div class="chapter" id="c5">
+  <div class="chapter-head">
+    <span class="ch-num">05</span>
+    <h2>三种运行模式</h2>
+  </div>
+
+  <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));">
+    <div class="card">
+      <span class="card-tag tag-skill">Default Mode</span>
+      <h3>默认模式</h3>
+      <p>每次执行操作（读/写文件、运行命令）都<strong>暂停等待你确认</strong>。安全，适合学习阶段。</p>
+    </div>
+    <div class="card">
+      <span class="card-tag tag-mcp">Plan Mode</span>
+      <h3>规划模式</h3>
+      <p>只读权限，先生成<strong>执行计划</strong>给你审核，确认后才写入。适合复杂任务、大范围操作。</p>
+    </div>
+    <div class="card">
+      <span class="card-tag tag-plugin">Bypass Mode</span>
+      <h3>全自动模式</h3>
+      <p>跳过所有确认，<strong>直接执行</strong>。启动参数加 <span class="ic">--dangerously-skip-permissions</span>，推荐日常使用。</p>
+    </div>
+  </div>
+
+  <h3>切换方式</h3>
+  <p>在 Claude Code 界面内按 <span class="ic">Shift + Tab</span> 循环切换模式。</p>
+
+  <h3>Plan Mode 的三个确认选项</h3>
+  <table>
+    <thead><tr><th>选项</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Yes and bypass</strong></td><td>同意计划，后续全部自动执行</td></tr>
+      <tr><td><strong>Manual approve each</strong></td><td>同意计划，但每一步仍需手动确认</td></tr>
+      <tr><td><strong>修改计划</strong></td><td>用自然语言说出修改意见，AI 更新后再次给你审核</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <strong>Plan Mode 最适合的三类场景：</strong>①项目初期验证 AI 理解是否正确；②广度大的批量操作（移动几百个文件）；③代码 Review，先看步骤再执行。
+  </div>
+</div>
+
+<!-- ──────────── 06 ──────────── -->
+<div class="chapter" id="c6">
+  <div class="chapter-head">
+    <span class="ch-num">06</span>
+    <h2>CLAUDE.md——项目"宪法"</h2>
+  </div>
+
+  <h3>生成方式</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/init
+<span class="c"># Claude 会扫描整个项目，自动生成 CLAUDE.md</span></code>
+  </div>
+
+  <p><strong>作用：</strong>每次对话启动时自动加载，相当于 AI 的永久指令，优先级最高。任何时候进入新项目都应先运行 <span class="ic">/init</span>。</p>
+
+  <h3>写什么</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">CLAUDE.md 示例</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="k"># 基本规则</span>
+- 所有回复使用中文
+- 操作文件前先告诉我打算做什么
+- 禁止执行 rm -rf 等危险命令
+- 禁止删除任何文件，只能移动
+
+<span class="k"># 详细开发规范</span>
+如需了解，请查阅 ./docs/dev-guide.md</code>
+  </div>
+
+  <h3>黄金原则：渐进式披露</h3>
+
+  <div class="diff">
+    <div class="diff-box bad">
+      <div class="diff-label">❌ 错误做法</div>
+      CLAUDE.md 写了几千字，把所有规范、背景、注意事项全部塞进去。
+    </div>
+    <div class="diff-box good">
+      <div class="diff-label">✅ 正确做法</div>
+      CLAUDE.md 只写核心规则（5-10 条），详细内容拆分到独立 MD 文件，CLAUDE.md 只写引用路径。
+    </div>
+  </div>
+
+  <div class="callout danger">
+    CLAUDE.md 过长的两个恶果：① 每次对话消耗大量 token；② 模型被"噪声"淹没，变得反应迟钝。
+  </div>
+</div>
+
+<!-- ──────────── 07 ──────────── -->
+<div class="chapter" id="c7">
+  <div class="chapter-head">
+    <span class="ch-num">07</span>
+    <h2>Agent 团队——分工协作</h2>
+  </div>
+
+  <h3>什么时候建 Agent</h3>
+  <p>满足以下任意一条：你<strong>重复执行同一类任务</strong>，且这类任务需要很长的 Prompt 和大量规范约束。</p>
+
+  <h3>典型 Agent 团队架构</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">团队结构示意</span></div>
+    <code>你（指挥官）
+├── 产品经理 Agent   → 分析需求、写 PRD、拆解任务
+├── 后端开发 Agent   → 写代码、调试
+├── 前端开发 Agent   → UI 实现
+├── 测试 Agent       → 检查 Bug、验证功能
+├── 资讯 Agent       → 每日信息采集、整理报告
+└── Codex Agent      → 在终端执行命令，与 Claude 自动对接</code>
+  </div>
+
+  <h3>创建步骤</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-head"><div class="step-n">1</div><div class="step-title">进入 Agent 管理</div></div>
+      <div class="step-body">
+        <div class="code-block"><div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div><code>/agent
+<span class="c"># 选择 Create new agent</span></code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">2</div><div class="step-title">选择权限级别与创建方式</div></div>
+      <div class="step-body"><p>Location 选 <strong>Project</strong>（项目级）；创建方式选 <strong>Generate with Claude</strong>（AI 辅助生成，推荐）。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">3</div><div class="step-title">描述 Agent 职责</div></div>
+      <div class="step-body">
+        <div class="code-block"><div class="code-head"><span class="code-lang">描述示例</span><button class="copy-btn" onclick="cp(this)">复制</button></div><code>你是一个技术合伙人 Agent。
+职责：评估技术方案可行性，设计系统架构，
+拆解开发任务并给出时间估算，
+进行代码 Review，识别技术风险。
+请用简洁专业的中文回答。</code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">4</div><div class="step-title">配置工具权限 / 模型 / 颜色</div></div>
+      <div class="step-body"><p>工具权限：↑↓ 导航，Enter 切换选中。模型选 <span class="ic">Inherit</span> 继承父级。颜色随意选，便于区分。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">5</div><div class="step-title">调用 Agent</div></div>
+      <div class="step-body">
+        <div class="code-block"><div class="code-head"><span class="code-lang">对话</span><button class="copy-btn" onclick="cp(this)">复制</button></div><code>帮我调用技术合伙人 Agent，我要做一个新项目……</code></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Agent 的隐藏价值：上下文隔离</h3>
+  <p>子 Agent 执行大量中间操作（抓取数据、处理文件），主对话只收到一句 "任务完成"，中间过程不占用主对话的上下文，大幅节省 token。</p>
+</div>
+
+<!-- ──────────── 08 ──────────── -->
+<div class="chapter" id="c8">
+  <div class="chapter-head">
+    <span class="ch-num">08</span>
+    <h2>四层能力架构：MCP · Skills · Hooks · Plugins</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <span class="card-tag tag-mcp">MCP</span>
+      <h3>模型上下文协议</h3>
+      <p>给 AI 装"手脚"——<strong>能不能做</strong>。连接外部系统，如文件读写、网络搜索、飞书操作。</p>
+    </div>
+    <div class="card">
+      <span class="card-tag tag-skill">Skills</span>
+      <h3>技能</h3>
+      <p>告诉 AI<strong>怎么做</strong>——固化工作流的 Prompt 模板，有能力后按什么步骤执行。</p>
+    </div>
+    <div class="card">
+      <span class="card-tag tag-hooks">Hooks</span>
+      <h3>钩子</h3>
+      <p>控制<strong>何时做</strong>——特定事件触发时自动执行的脚本，可拦截或追加操作。</p>
+    </div>
+    <div class="card">
+      <span class="card-tag tag-plugin">Plugins</span>
+      <h3>插件</h3>
+      <p>三者的<strong>打包封装</strong>——一键分享完整配置给团队，或换电脑时一键恢复。</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>类比：</strong>开卷考试 → MCP = 你有没有把参考书带进考场；Skills = 你知不知道怎么快速翻书找答案。两者缺一不可。
+  </div>
+
+  <h3>三大必装 MCP</h3>
+  <table>
+    <thead><tr><th>MCP</th><th>作用</th><th>安装命令</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>filesystem</strong></td>
+        <td>读写电脑任意位置文件，不受当前文件夹限制</td>
+        <td><span class="ic">claude mcp add filesystem ...</span></td>
+      </tr>
+      <tr>
+        <td><strong>brave-search</strong></td>
+        <td>实时搜索网页，配合 Loop 做资讯采集</td>
+        <td><span class="ic">claude mcp add brave-search ...</span></td>
+      </tr>
+      <tr>
+        <td><strong>lark-mcp（飞书）</strong></td>
+        <td>回消息、发通知、定会议、安排日程</td>
+        <td><span class="ic">claude mcp add lark-mcp ...</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">查看已安装的 MCP 和 Skills</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/mcp      <span class="c"># 查看 MCP 列表</span>
+/skills   <span class="c"># 查看 Skills 列表</span></code>
+  </div>
+
+  <div class="callout warn">
+    <strong>Skills 越精越好，不是越多越好。</strong>Skills 过多 = 模型选择困难症，不知道何时该调用哪个，执行效果反而变差。建议在使用中发现高频重复工作流后再针对性创建。
+  </div>
+
+  <h3>Skill 标准文件结构</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">skill-template.md</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="k"># Skill 名称</span>
+
+<span class="k">## 触发条件</span>
+什么情况下使用这个 Skill
+
+<span class="k">## 执行步骤</span>
+1. 第一步做什么
+2. 第二步做什么
+
+<span class="k">## 输出规范</span>
+- 格式要求
+- 保存位置：D:\文件夹\文件名规则
+
+<span class="k">## 禁止事项</span>
+- 不能做什么
+- 遇到什么情况时停止并告知我</code>
+  </div>
+</div>
+
+<!-- ──────────── 09 ──────────── -->
+<div class="chapter" id="c9">
+  <div class="chapter-head">
+    <span class="ch-num">09</span>
+    <h2>Hooks——自动触发钩子</h2>
+  </div>
+
+  <h3>两类 Hooks</h3>
+  <table>
+    <thead><tr><th>类型</th><th>触发时机</th><th>典型用途</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pre-tool Hook</strong></td><td>工具调用前</td><td>拦截敏感文件访问、参数检查</td></tr>
+      <tr><td><strong>Post-tool Hook</strong></td><td>工具调用后</td><td>自动 git push、发送通知</td></tr>
+    </tbody>
+  </table>
+
+  <h3>两个真实案例</h3>
+
+  <h4>案例 1：隐私保护 Hook</h4>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">创建指令</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>帮我创建一个 Pre-tool Hook：
+每次 AI 读取文件前，检查路径是否包含
+.secret / .key / password 等敏感词，
+若匹配则拦截操作并询问我是否确认。</code>
+  </div>
+
+  <h4>案例 2：代码 Review 后自动推送</h4>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">创建指令</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code">帮我创建一个 Post-tool Hook：
+每次 /simplify 命令执行完成后，
+自动运行 git add . && git push
+推送到我的 GitHub 仓库。</code>
+  </div>
+</div>
+
+<!-- ──────────── 10 ──────────── -->
+<div class="chapter" id="c10">
+  <div class="chapter-head">
+    <span class="ch-num">10</span>
+    <h2>四大隐藏命令——精华中的精华</h2>
+  </div>
+
+  <h3>/simplify — 三 Agent 并行代码审查</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/simplify</code>
+  </div>
+
+  <p>执行后派出三个子 Agent 并行检查变更代码：</p>
+  <table>
+    <thead><tr><th>Agent</th><th>检查内容</th></tr></thead>
+    <tbody>
+      <tr><td>Agent ①</td><td>重复造轮子、冗余代码</td></tr>
+      <tr><td>Agent ②</td><td>命名规范、可读性、代码质量</td></tr>
+      <tr><td>Agent ③</td><td>性能隐患、内存泄露、重复计算</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip">前提：项目需有 <span class="ic">.git</span> 文件夹。它只审查 <span class="ic">git diff</span> 的变更部分，不扫描整个项目。建议每次提交前运行一次。</div>
+
+  <hr class="divider">
+
+  <h3>/rewind — 时光倒流</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/rewind
+<span class="c"># 快捷键：Esc + Esc</span></code>
+  </div>
+
+  <table>
+    <thead><tr><th>选项</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Restore conversation</strong></td><td>在旧检查点开新分支继续，原对话不变。<strong>最常用。</strong></td></tr>
+      <tr><td><strong>Summarize from here</strong></td><td>压缩中间对话成摘要再继续，释放上下文空间</td></tr>
+      <tr><td><strong>Nevermind</strong></td><td>取消操作</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">注意：只能恢复 Claude 的文件编辑操作，无法撤销已执行的 Bash 命令（如 rm / mv）。</div>
+
+  <hr class="divider">
+
+  <h3>/insights — 协作习惯体检</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/insights</code>
+  </div>
+  <p>读取所有历史对话，生成报告：你在哪里花时间最多、在哪类问题上最容易卡住、常见决策模式、token 消耗分析。建议每两周运行一次，根据结果优化 CLAUDE.md 和 Skills。</p>
+
+  <hr class="divider">
+
+  <h3>/loop — 定时循环任务</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="c"># 基础用法</span>
+/loop interval=1h 帮我查询当前时间
+
+<span class="c"># 与 Skill 结合（杀手锏）</span>
+/loop interval=24h time=08:00 执行「ai-news」Skill</code>
+  </div>
+
+  <table>
+    <thead><tr><th>限制</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>有效期</td><td>最长 3 天，到期自动停止</td></tr>
+      <tr><td>运行条件</td><td>Claude Code 终端必须保持开启</td></tr>
+      <tr><td>最大任务数</td><td>每个会话最多 50 个</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ──────────── 11 ──────────── -->
+<div class="chapter" id="c11">
+  <div class="chapter-head">
+    <span class="ch-num">11</span>
+    <h2>Plugins——配置打包带走</h2>
+  </div>
+
+  <p>Plugin = Hooks + Skills + MCP 的封装包。适合团队共享配置、换电脑一键恢复环境。</p>
+
+  <h3>官方推荐：Codex Plugin</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">终端 + Claude Code</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="c"># 终端安装</span>
+npm install -g claude-plugin-cc
+
+<span class="c"># 进入 Claude Code 后</span>
+/setup codex</code>
+  </div>
+
+  <p>安装后，Claude Code 可直接调用 Codex，两个 AI 自动协作：你发任务 → Claude Code 拆解 → 子任务交给 Codex 执行 → 结果回传 → 继续下一步。<strong>全程无需人工传递上下文。</strong></p>
+</div>
+
+<!-- ──────────── 12 ──────────── -->
+<div class="chapter" id="c12">
+  <div class="chapter-head">
+    <span class="ch-num">12</span>
+    <h2>Handoff 文件——跨对话记忆移植</h2>
+  </div>
+
+  <div class="callout danger">
+    <strong>问题根源：</strong>Claude Code 上下文窗口是一次性的，新对话所有"共识"清零。对话超过 20-30 轮后，autocompact 会压缩上下文，早期架构约束被遗忘，莫名 Bug 越来越多。
+  </div>
+
+  <h3>何时生成</h3>
+  <table>
+    <thead><tr><th>场景</th><th>口诀</th></tr></thead>
+    <tbody>
+      <tr><td>对话超过 20-30 轮</td><td>"话多了，写纸条"</td></tr>
+      <tr><td>完成阶段性任务后</td><td>"一阶段，一交接"</td></tr>
+      <tr><td>Claude 开始重复犯错</td><td>"重复错，快交接"</td></tr>
+      <tr><td>跨天继续工作前</td><td>"跨天班，必交接"</td></tr>
+    </tbody>
+  </table>
+
+  <h3>标准模板</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">handoff.md</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code><span class="k"># Handoff - [日期] [任务名]</span>
+
+<span class="k">## 当前状态</span>
+- 整体进度：XX%
+- 最后完成的事：...
+
+<span class="k">## 已验证有效的方案</span>
+- 用了 XXX 方法解决了 YYY 问题
+- 关键参数：...
+
+<span class="k">## ❌ 已排除的方案（最重要！）</span>
+- 方案 A：试过，会导致内存泄漏
+- 方案 B：与当前版本不兼容
+
+<span class="k">## 下一步</span>
+1. 待解决：...
+2. 待验证：...
+
+<span class="k">## 关键约束（不能破坏）</span>
+- 不能动 XX 文件
+- 必须兼容 YY 版本
+
+<span class="k">## 相关文件路径</span>
+- 主文件：src/...
+- 配置：config/...</code>
+  </div>
+
+  <div class="callout tip">
+    <strong>「已排除方案」是价值最高的一栏。</strong>没有它，新对话的 Claude 会重新"发明"你们已否定过的路径，你又要花时间重新解释"这个我们试过，不行"——这正是上下文污染最浪费时间的地方。
+  </div>
+
+  <h3>加载到新对话</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">新对话第一句话</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>请先读取 handoff.md，了解我们的进度和约束，
+然后复述一遍你的理解，确认后我们继续。</code>
+  </div>
+  <p><strong>让它复述理解</strong>是验证加载有效的关键步骤，不要跳过。</p>
+
+  <h3>CLAUDE.md vs Handoff 的分工</h3>
+  <table>
+    <thead><tr><th></th><th>CLAUDE.md</th><th>Handoff 文件</th></tr></thead>
+    <tbody>
+      <tr><td><strong>内容</strong></td><td>永久性项目规则</td><td>临时性任务进度</td></tr>
+      <tr><td><strong>更新频率</strong></td><td>很少改</td><td>每次任务后更新</td></tr>
+      <tr><td><strong>生效方式</strong></td><td>自动加载</td><td>手动加载</td></tr>
+      <tr><td><strong>类比</strong></td><td>公司规章制度</td><td>项目交接班日志</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ──────────── 13 ──────────── -->
+<div class="chapter" id="c13">
+  <div class="chapter-head">
+    <span class="ch-num">13</span>
+    <h2>节省 Token——控制成本</h2>
+  </div>
+
+  <h3>最大的隐性消耗：工具调用噪声</h3>
+  <p>每次调用工具（运行测试、搜索文件）会产生大量输出，全部塞进上下文。模型只需知道"成功/失败"，那几百行日志是纯噪声。</p>
+
+  <h3>解决方案：安装 RTK</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">终端</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>curl -fsSL https://get.rtk.dev/install.sh | sh
+rtk init   <span class="c"># 自动创建 Pre-tool Hook，拦截并压缩输出</span></code>
+  </div>
+
+  <table>
+    <thead><tr><th>命令</th><th>原始 Token</th><th>RTK 压缩后</th><th>节省</th></tr></thead>
+    <tbody>
+      <tr><td>git status</td><td>3,000</td><td>600</td><td>80%</td></tr>
+      <tr><td>cargo test</td><td>25,000</td><td>2,500</td><td>90%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>其他节省习惯</h3>
+  <table>
+    <thead><tr><th>习惯</th><th>效果</th></tr></thead>
+    <tbody>
+      <tr><td>CLAUDE.md 保持精简</td><td>每次对话少加载几千 token</td></tr>
+      <tr><td>复杂子任务交给独立 Agent</td><td>主对话不被中间过程撑大</td></tr>
+      <tr><td>长对话用 Handoff 开新对话</td><td>避免多次压缩损耗质量</td></tr>
+      <tr><td>Plan Mode 先规划再执行</td><td>减少走弯路浪费的 token</td></tr>
+      <tr><td>优先用 CLI 工具而非 MCP</td><td>CLI 不注入工具定义，更省</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ──────────── 14 ──────────── -->
+<div class="chapter" id="c14">
+  <div class="chapter-head">
+    <span class="ch-num">14</span>
+    <h2>实战案例：AI 日报自动助手</h2>
+  </div>
+
+  <p>完整组合：<strong>MCP（搜索能力）+ Skill（采集模板）+ Loop（定时触发）</strong></p>
+
+  <h3>Step 1：创建保存文件夹</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">对话指令</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>帮我在 D 盘创建文件夹「AI日报」</code>
+  </div>
+
+  <h3>Step 2：创建 ai-news Skill</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">对话指令（完整）</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>帮我创建一个 Skill，名字叫「ai-news」，内容如下：
+
+触发条件：我说「抓取AI新闻」或定时任务触发
+
+执行步骤：
+1. 搜索今天的AI行业动态，关键词：
+   - 大模型发布/更新
+   - AI公司融资/收购
+   - 国内AI政策动向
+   - 模型跑分/评测结果
+   - AI产品新功能
+
+2. 筛选：只保留今天或昨天内容，去除重复和广告软文
+
+3. 整理为以下格式：
+   # AI日报 - [今天日期]
+   ## 🔥 今日最重要（1-2条）
+   ## 📦 模型/产品动态
+   ## 💰 商业/融资动态
+   ## 🇨🇳 国内动态
+   ## 💡 今日观察（2-3句趋势总结）
+
+4. 保存到 D:\AI日报\[今天日期].md
+5. 完成后告知保存路径</code>
+  </div>
+
+  <h3>Step 3：手动触发验证</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">对话</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>抓取AI新闻</code>
+  </div>
+  <p>确认格式正确、保存位置正确后，再设置定时。</p>
+
+  <h3>Step 4：设置每日定时</h3>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Claude Code 内</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>/loop interval=24h time=08:00 执行「ai-news」Skill</code>
+  </div>
+
+  <h3>Step 5（可选）：推送到飞书</h3>
+  <p>装好飞书 MCP 后，在 Skill 末尾加一步：</p>
+  <div class="code-block">
+    <div class="code-head"><span class="code-lang">Skill 追加内容</span><button class="copy-btn" onclick="cp(this)">复制</button></div>
+    <code>5. 把生成的日报内容发送到飞书「AI日报」群</code>
+  </div>
+
+  <div class="callout tip">效果：每天早上打开飞书就能看到，不需要主动去找文件。</div>
+</div>
+
+<!-- ──────────── 15 ──────────── -->
+<div class="chapter" id="c15">
+  <div class="chapter-head">
+    <span class="ch-num">15</span>
+    <h2>思维转变 & 四步入门路径</h2>
+  </div>
+
+  <h3>核心思维转变</h3>
+  <div class="diff">
+    <div class="diff-box bad">
+      <div class="diff-label">❌ 旧思维：问 AI</div>
+      每次从零解释需求，等待单次回答，手动执行结果。
+    </div>
+    <div class="diff-box good">
+      <div class="diff-label">✅ 新思维：指挥 AI</div>
+      一次配置 Skill，反复触发执行，AI 自主汇报结果。
+    </div>
+  </div>
+
+  <h3>你的四步入门路径</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-head"><div class="step-n">1</div><div class="step-title">运行 /init，生成 CLAUDE.md</div></div>
+      <div class="step-body"><p>进入任意工作文件夹，输入 <span class="ic">/init</span>，让 Claude 了解项目结构，生成初始配置文件。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">2</div><div class="step-title">编辑 CLAUDE.md，写下"家规"</div></div>
+      <div class="step-body"><p>写 3-5 条基本规则（禁止删除文件、回复用中文、禁止危险命令等），其余详细内容引用外部文件。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">3</div><div class="step-title">安装 filesystem MCP</div></div>
+      <div class="step-body"><p>让 Claude Code 获得操作你电脑任意位置文件的能力，告诉它你的常用目录路径。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-n">4</div><div class="step-title">完成第一个真实任务</div></div>
+      <div class="step-body"><p>整理 Downloads 文件夹 + 设置 Loop 定时。把教程知识变成肌肉记忆。</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────── 附录 ──────────── -->
+<div class="chapter" id="c16">
+  <div class="chapter-head">
+    <span class="ch-num">附录</span>
+    <h2>口诀速查表</h2>
+  </div>
+
+  <div class="rhyme">
+    <div class="rhyme-title">概念口诀</div>
+    <div class="rhyme-row"><span class="rhyme-key">MCP</span><span>长手脚，能看能动手</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">Skills</span><span>是大脑，记住套路不用教</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">Hooks</span><span>是神经，特定刺激自动跳</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">Plugins</span><span>是背包，打包带走开箱用</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">/simplify</span><span>三师会审，代码瘦身</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">/rewind</span><span>时光机，回到存档点</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">/insights</span><span>体检报告，看清自己</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">/loop</span><span>定时闹钟，到点就开工</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">Handoff</span><span>交接班，写清楚，下任不踩坑</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">已排除方案</span><span>过敏史，写明白，不再开错药</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">CLAUDE.md</span><span>制度管长期，日报管当下</span></div>
+  </div>
+
+  <h3>Token 节省口诀</h3>
+  <div class="rhyme">
+    <div class="rhyme-title">省钱口诀</div>
+    <div class="rhyme-row"><span class="rhyme-key">CLAUDE.md</span><span>手册薄，负担轻</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">子任务</span><span>大事分出去，主厅不拥挤</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">长对话</span><span>话长了，换间房</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">Plan Mode</span><span>先画地图，再走路</span></div>
+    <div class="rhyme-row"><span class="rhyme-key">工具选择</span><span>能 CLI 不 MCP，省 token 又省心</span></div>
+  </div>
+
+  <h3>最后一句话</h3>
+  <div class="callout info" style="font-size:15px;font-family:'Noto Serif SC',serif;line-height:2;">
+    工具只是工具，AI 时代最重要的不是你会多少个命令，而是你的<strong>想法</strong>。AI 就像阿拉丁神灯，你提什么愿望，它就帮你实现什么愿望。做一个有趣的人，<strong>Dream Bigger</strong>。
+  </div>
+</div>
+
+</div><!-- /body-wrap -->
+
+<div class="footer">
+  Claude Code 完整学习笔记 · 整理自系列教程对话 · 2026
+</div>
+
+<script>
+function cp(btn) {
+  const block = btn.closest('.code-block');
+  const raw = block.querySelector('code').innerText;
+  const clean = raw.replace(/^\/\/.*\n?/gm, '').replace(/^\s*#.*\n?/gm, m => m.includes('#!') ? m : '').trim();
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.textContent = '已复制 ✓';
+    btn.style.color = '#3a8a5a';
+    btn.style.borderColor = '#3a8a5a';
+    setTimeout(() => { btn.textContent = '复制'; btn.style.color = ''; btn.style.borderColor = ''; }, 1800);
+  });
+}
+</script>
+</body>
+</html>
