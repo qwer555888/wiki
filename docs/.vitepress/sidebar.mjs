@@ -136,8 +136,8 @@ export function generateSidebar() {
       for (const file of publicFiles) {
         const title = extractTitle(file)
         const icon = getFileIcon(file)
-        // Links to public files are served from /wiki/notes/...
-        const filePath = `/wiki/notes/${year}/${dateFolder}/${file}`
+        // Links to public files - VitePress base path /wiki is prepended automatically
+        const filePath = `/notes/${year}/${dateFolder}/${file}`
         fileItems.push({
           text: `${icon}${title}`,
           link: filePath,
