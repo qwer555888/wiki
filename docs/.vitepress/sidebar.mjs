@@ -27,17 +27,40 @@ function getDateFolders(yearPath) {
   return dates.sort().reverse()
 }
 
-function getMarkdownFiles(datePath) {
+// Supported file types and their icons
+const FILE_TYPE_CONFIG = {
+  '.md': { icon: '' },
+  '.pdf': { icon: '📄 ' },
+  '.html': { icon: '🌐 ' },
+  '.docx': { icon: '📝 ' },
+  '.xlsx': { icon: '📊 ' }
+}
+
+const SUPPORTED_EXTENSIONS = Object.keys(FILE_TYPE_CONFIG)
+
+function getFiles(datePath) {
   const files = []
   if (!fs.existsSync(datePath)) return files
 
   const items = fs.readdirSync(datePath, { withFileTypes: true })
   for (const item of items) {
-    if (item.isFile() && item.name.endsWith('.md')) {
-      files.push(item.name)
+    if (item.isFile()) {
+      const ext = path.extname(item.name).toLowerCase()
+      if (SUPPORTED_EXTENSIONS.includes(ext)) {
+        files.push(item.name)
+      }
     }
   }
   return files.sort()
+}
+
+function getFileIcon(filename) {
+  const ext = path.extname(filename).toLowerCase()
+  return FILE_TYPE_CONFIG[ext]?.icon || ''
+}
+
+function isMarkdownFile(filename) {
+  return filename.toLowerCase().endsWith('.md')
 }
 
 function parseDate(folderName) {
@@ -52,8 +75,9 @@ function parseDate(folderName) {
 }
 
 function extractTitle(filename) {
-  // Remove .md extension and number prefix (e.g., "01-标题.md" -> "标题")
-  const withoutExt = filename.replace('.md', '')
+  // Remove extension and number prefix (e.g., "01-标题.md" -> "标题", "01-文档.pdf" -> "文档")
+  const ext = path.extname(filename)
+  const withoutExt = filename.slice(0, -ext.length)
   const match = withoutExt.match(/^\d+-(.+)$/)
   return match ? match[1] : withoutExt
 }
@@ -73,13 +97,26 @@ export function generateSidebar() {
     const dateItems = []
     for (const dateFolder of dateFolders) {
       const datePath = path.join(yearPath, dateFolder)
-      const files = getMarkdownFiles(datePath)
+      const files = getFiles(datePath)
 
       const fileItems = files.map(file => {
         const title = extractTitle(file)
-        return {
-          text: title,
-          link: `/notes/${year}/${dateFolder}/${file.replace('.md', '')}`
+        const icon = getFileIcon(file)
+        const filePath = `/notes/${year}/${dateFolder}/${file}`
+
+        if (isMarkdownFile(file)) {
+          // Markdown files use VitePress routing (without .md extension)
+          return {
+            text: `${icon}${title}`,
+            link: filePath.replace('.md', '')
+          }
+        } else {
+          // Other file types: direct link to file with target=_blank
+          return {
+            text: `${icon}${title}`,
+            link: filePath,
+            target: '_blank'
+          }
         }
       })
 
