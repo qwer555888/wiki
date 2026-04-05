@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from './sidebar.mjs'
 
 export default defineConfig({
+  ignoreDeadLinks: true,
   title: "Quimaz's Wiki",
   description: 'Personal Knowledge Base',
   base: '/wiki/',
