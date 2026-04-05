@@ -12,8 +12,8 @@ export default defineConfig({
 
   themeConfig: {
     nav: [
-      { text: '棣栭〉', link: '/' },
-      { text: '绗旇', link: '/notes/2026/04-05/01-绗旇' }
+      { text: '首页', link: '/' },
+      { text: '笔记', link: '/notes/2026/04-05/01-笔记' }
     ],
 
     sidebar: generateSidebar(),
@@ -27,7 +27,7 @@ export default defineConfig({
     },
 
     lastUpdated: {
-      text: '鏈€鍚庢洿鏂?,
+      text: '最后更新',
       formatOptions: {
         dateStyle: 'short',
         timeStyle: 'short'
